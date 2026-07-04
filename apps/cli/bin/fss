@@ -1,0 +1,74 @@
+#!/bin/sh
+# shellcheck disable=SC1091  # lib files are sourced via $FSS_HOME and linted individually
+# fss — A Fast Security Scan for developers.
+#
+# Scans Node.js projects for security issues and supply-chain attack
+# indicators, cleans node_modules safely, and flags outdated dependencies.
+# POSIX sh only: runs on macOS (sh/bash) and Debian-based Linux (dash).
+#
+# Usage: fss <command> [dir] [options]
+set -u
+
+FSS_HOME="$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)"
+
+# shellcheck source=../lib/common.sh
+. "$FSS_HOME/lib/common.sh"
+
+usage() {
+  cat <<EOF
+${BLD}fss${RST} $FSS_VERSION — A Fast Security Scan for developers.
+
+Usage: fss <command> [dir] [options]
+
+Commands:
+  scan [dir]                Scan for security issues and supply-chain
+                            attack indicators (default dir: .)
+  clean [dir] [--dry-run] [--yes]
+                            Find and safely delete node_modules directories
+  outdated [dir]            Check dependency versions against the npm registry
+
+Options:
+  -h, --help                Show this help
+  -v, --version             Show version
+
+Environment:
+  NO_COLOR=1                Disable colored output
+  FSS_OFFLINE=1             Skip registry lookups in 'outdated'
+
+Exit codes:
+  scan:     0 clean, 1 warnings, 2 critical findings, 3 error
+  clean:    0 success, 3 error
+  outdated: 0 all current, 1 outdated found, 3 error
+EOF
+}
+
+[ $# -ge 1 ] || { usage; exit 3; }
+
+cmd="$1"
+shift
+
+case "$cmd" in
+  scan)
+    . "$FSS_HOME/lib/scan.sh"
+    cmd_scan "$@"
+    ;;
+  clean)
+    . "$FSS_HOME/lib/clean.sh"
+    cmd_clean "$@"
+    ;;
+  outdated)
+    . "$FSS_HOME/lib/outdated.sh"
+    cmd_outdated "$@"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  -v|--version|version)
+    printf '%s\n' "$FSS_VERSION"
+    ;;
+  *)
+    printf 'fss: unknown command: %s\n\n' "$cmd" >&2
+    usage
+    exit 3
+    ;;
+esac

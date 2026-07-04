@@ -1,0 +1,19 @@
+{
+  "name": "fss",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Fast Security Scan for developers.",
+  "workspaces": [
+    "apps/www"
+  ],
+  "scripts": {
+    "test": "sh apps/cli/test/run-tests.sh",
+    "scan": "apps/cli/bin/fss scan .",
+    "deploy:www": "npm run deploy --workspace @fss/www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coodyapp/fss.git"
+  },
+  "license": "MIT"
+}
