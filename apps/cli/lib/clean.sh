@@ -73,7 +73,7 @@ cmd_clean() {
 
   while IFS= read -r dir; do
     # Re-verify before each delete: still a real dir, still named node_modules.
-    [ -d "$dir" ] && [ ! -L "$dir" ] || continue
+    if [ ! -d "$dir" ] || [ -L "$dir" ]; then continue; fi
     case "$dir" in
       */node_modules) rm -rf -- "$dir" ;;
       *) warn "unexpected path skipped: $dir" ;;
