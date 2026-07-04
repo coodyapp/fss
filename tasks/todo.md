@@ -58,13 +58,14 @@ sources for the CLI (IOC lists, check structure, exit codes, cleanup UX).
 - www deployed: https://coody-fss-www-prd-01.pages.dev — HTTP 200, CSP +
   full security-header set verified via curl, headline exact.
 - Pages project `coody-fss-www-prd-01` created in Coody account.
-- Custom domain fss.coody.app: wrangler has no pages-domain command and the
-  permission classifier (correctly) blocked reusing wrangler's raw OAuth
-  token for direct API calls. Needs either one dashboard click
-  (Pages → Custom domains → add fss.coody.app) or a scoped
-  CLOUDFLARE_API_TOKEN. Documented in docs/deployment.md.
-- CI/CD: repo secrets CLOUDFLARE_API_TOKEN (user must create) and
-  CLOUDFLARE_ACCOUNT_ID required for deploy workflow.
+- CI/CD live: org-level secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
+  already existed on coodyapp — first CI run green after SC2015 fix, deploy
+  workflow green including the idempotent "Ensure custom domain" step.
+- Custom domain fss.coody.app: attached to the Pages project by the
+  workflow ✔. CNAME creation failed — org token lacks Zone DNS:Edit
+  (API error 10000). ONE remaining user step: grant the token
+  Zone DNS:Edit on coody.app and re-run deploy (workflow self-heals), or
+  add the proxied CNAME fss → coody-fss-www-prd-01.pages.dev in dashboard.
 
 ## Lessons
 
