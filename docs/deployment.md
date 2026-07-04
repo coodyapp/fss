@@ -27,22 +27,26 @@ Runs on every push and pull request:
 ### `.github/workflows/deploy-www.yml`
 
 Runs on pushes to `main` that touch `apps/www/**` (plus manual
-`workflow_dispatch`). Single step:
+`workflow_dispatch`). Two steps:
 
-```sh
-npx --yes wrangler@4 pages deploy apps/www/public --project-name coody-fss-www-prd-01
-```
+1. `npx --yes wrangler@4 pages deploy apps/www/public --project-name coody-fss-www-prd-01`
+2. **Ensure custom domain** — idempotently attaches `fss.coody.app` to the
+   Pages project and creates the proxied CNAME
+   (`fss.coody.app → coody-fss-www-prd-01.pages.dev`) in the `coody.app`
+   zone. "Already exists" is success; missing token permissions produce a
+   workflow warning instead of a failed deploy.
 
 Deploys are serialized with a `concurrency` group; both workflows run with
 `permissions: contents: read` and interpolate no untrusted event data.
 
-## Required repository settings
+## Required settings
 
-Configure once in GitHub → repo → Settings → Secrets and variables → Actions:
+Already provisioned as **organization-level** secrets on `coodyapp`
+(available to all repos):
 
 | Secret | Value |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | API token with **Cloudflare Pages: Edit** permission, scoped to the Coody account. Create at dash.cloudflare.com → My Profile → API Tokens |
+| `CLOUDFLARE_API_TOKEN` | API token with **Cloudflare Pages: Edit** (deploy + domain attach) and **Zone DNS: Edit** on `coody.app` (CNAME creation) |
 | `CLOUDFLARE_ACCOUNT_ID` | `51a60f4777316c6bfd6b773b58a494e8` |
 
 ## Initial provisioning (already done, kept for reference)
@@ -56,11 +60,13 @@ npx wrangler pages project create coody-fss-www-prd-01 --production-branch=main
 # 2. First deploy
 npx wrangler pages deploy apps/www/public --project-name coody-fss-www-prd-01
 
-# 3. Custom domain (Pages project → Custom domains)
-#    fss.coody.app → CNAME → coody-fss-www-prd-01.pages.dev
-#    Added via dashboard or API:
+# 3. Custom domain — handled by the "Ensure custom domain" step in
+#    deploy-www.yml on every deploy (idempotent). Equivalent API calls:
 #    POST /accounts/{account_id}/pages/projects/coody-fss-www-prd-01/domains
-#    { "name": "fss.coody.app" }
+#      { "name": "fss.coody.app" }
+#    POST /zones/{zone_id}/dns_records
+#      { "type": "CNAME", "name": "fss.coody.app",
+#        "content": "coody-fss-www-prd-01.pages.dev", "proxied": true }
 ```
 
 The `coody.app` zone lives in the same Cloudflare account, so the custom
