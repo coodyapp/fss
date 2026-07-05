@@ -1,0 +1,10 @@
+name = "coody-fss-www-prd-01"
+compatibility_date = "2026-06-17"
+account_id = "51a60f4777316c6bfd6b773b58a494e8"
+
+[[routes]]
+pattern = "fss.coody.app"
+custom_domain = true
+
+[assets]
+directory = "./dist"
