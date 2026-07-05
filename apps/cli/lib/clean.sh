@@ -8,7 +8,7 @@
 #   - interactive confirmation unless --yes; --dry-run never deletes
 
 cmd_clean() {
-  local root dry_run=0 assume_yes=0 arg dir kb total_kb=0 count=0 answer
+  local root dry_run=0 assume_yes=0 arg dir kb total_kb=0 deleted_kb=0 count=0 answer
 
   for arg in "$@"; do
     case "$arg" in
@@ -49,7 +49,7 @@ cmd_clean() {
     total_kb=$((total_kb + kb))
     count=$((count + 1))
     printf '  %8s  %s\n' "$(human_kb "$kb")" "$dir"
-    printf '%s\n' "$dir" >> "$TMP/targets"
+    printf '%s %s\n' "$kb" "$dir" >> "$TMP/targets"
   done < "$TMP/dirs"
 
   [ -s "$TMP/targets" ] || { ok "nothing to delete"; return 0; }
@@ -71,15 +71,16 @@ cmd_clean() {
     esac
   fi
 
-  while IFS= read -r dir; do
+  # Count only what was actually removed, so the summary can't overstate.
+  while IFS=' ' read -r kb dir; do
     # Re-verify before each delete: still a real dir, still named node_modules.
     if [ ! -d "$dir" ] || [ -L "$dir" ]; then continue; fi
     case "$dir" in
-      */node_modules) rm -rf -- "$dir" ;;
+      */node_modules) rm -rf -- "$dir" && deleted_kb=$((deleted_kb + kb)) ;;
       *) warn "unexpected path skipped: $dir" ;;
     esac
   done < "$TMP/targets"
 
-  ok "reclaimed $(human_kb "$total_kb")"
+  ok "reclaimed $(human_kb "$deleted_kb")"
   return 0
 }

@@ -44,7 +44,7 @@ find_js() {
 grep_files() {
   local f match
   while IFS= read -r f; do
-    match="$(grep -E -m 1 -o "$1" "$f" 2>/dev/null | head -n 1)" || continue
+    match="$(grep -E -m 1 -o "$1" "$f" 2>/dev/null | head -n 1)"
     [ -n "$match" ] && printf '%s: %s\n' "$f" "$match"
   done
 }
@@ -122,7 +122,8 @@ scan_credentials() {
   report_hits "$TMP/hits" crit "npm credential committed in project .npmrc"
 
   if [ -d "$root/.git" ] && has git; then
-    git -C "$root" ls-files '.env' '.env.*' '*/.env' 2>/dev/null | grep -v '\.example$' > "$TMP/hits" || true
+    git -C "$root" ls-files '.env' '.env.*' '*/.env' '*/.env.*' 2>/dev/null |
+      grep -v '\.example$' > "$TMP/hits" || true
     report_hits "$TMP/hits" warn ".env file tracked in git"
   fi
 
@@ -137,7 +138,9 @@ scan_registry_and_lockfile() {
   for f in "$root/.npmrc" "$HOME/.npmrc"; do
     [ -f "$f" ] || continue
     reg="$(grep -E '^registry=' "$f" 2>/dev/null | head -n 1)"
-    if [ -n "$reg" ] && ! printf '%s' "$reg" | grep -q 'https://registry\.npmjs\.org'; then
+    # Anchored: a lookalike like registry.npmjs.org.evil.example must not pass.
+    if [ -n "$reg" ] &&
+       ! printf '%s' "$reg" | grep -qE '^registry=https://registry\.npmjs\.org/?[[:space:]]*$'; then
       warn "non-default npm registry in $f: ${reg#registry=}"
       FOUND=1
     fi

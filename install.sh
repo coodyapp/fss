@@ -20,6 +20,12 @@ die() { printf 'install.sh: %s\n' "$*" >&2; exit 1; }
 
 command -v tar >/dev/null 2>&1 || die "tar is required"
 
+# FSS_DIR is wiped and recreated on every install — refuse obviously
+# catastrophic targets before touching anything.
+case "$FSS_DIR" in
+  ""|/|"$HOME"|"$HOME/") die "refusing to install into '$FSS_DIR' — set FSS_DIR to a dedicated directory" ;;
+esac
+
 fetch() {
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$1"

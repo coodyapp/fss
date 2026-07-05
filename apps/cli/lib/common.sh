@@ -85,6 +85,9 @@ json_deps() {
 }
 
 # Extract the "version" field from a package.json (or registry JSON blob).
+# First occurrence wins: greedy sed would grab the last "version" key on
+# minified single-line JSON (e.g. a dependency literally named "version").
 json_version() {
-  sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$1" | head -n 1
+  grep -E -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$1" 2>/dev/null | head -n 1 |
+    sed 's/.*"\([^"]*\)"$/\1/'
 }
