@@ -30,7 +30,9 @@ fetch() {
   fi
 }
 
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/fss-install.XXXXXX")" || die "cannot create temp dir"
+# Workdir name must not match the fss-* glob used to locate the extracted
+# tarball directory below.
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/fss_install.XXXXXX")" || die "cannot create temp dir"
 trap 'rm -rf "$WORK"' EXIT INT TERM
 
 say "Downloading fss (main) ..."

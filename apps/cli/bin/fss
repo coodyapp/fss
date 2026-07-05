@@ -9,7 +9,17 @@
 # Usage: fss <command> [dir] [options]
 set -u
 
-FSS_HOME="$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)"
+# Resolve $0 through symlinks (install.sh links ~/.local/bin/fss here) so
+# FSS_HOME points at the real install dir, not the symlink's parent.
+SELF="$0"
+while [ -h "$SELF" ]; do
+  LINK="$(readlink "$SELF")"
+  case "$LINK" in
+    /*) SELF="$LINK" ;;
+    *) SELF="$(dirname -- "$SELF")/$LINK" ;;
+  esac
+done
+FSS_HOME="$(CDPATH='' cd -- "$(dirname -- "$SELF")/.." && pwd)"
 
 # shellcheck source=../lib/common.sh
 . "$FSS_HOME/lib/common.sh"
