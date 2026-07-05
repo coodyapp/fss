@@ -42,11 +42,11 @@ Runs on pushes to `main` and non-draft pull requests: `pnpm install
 
 Runs on `v*.*.*` tags and manual `workflow_dispatch`. Builds the site with
 `pnpm --filter www build`, then deploys `apps/www/dist` to the Pages project
-with `wrangler-action` (`pages deploy`, run from the repo root — the root
-`pnpm-lock.yaml` is what makes the action pick pnpm; don't give it a
-`workingDirectory` without a lockfile or its npm fallback breaks the
-pnpm-managed `node_modules`). Targets the `prd` environment
-(https://fss.coody.app).
+via `pnpm deploy:www` (plain `pnpm dlx wrangler@4 pages deploy`, same
+command as local deploys — `cloudflare/wrangler-action` cannot install
+wrangler in this pnpm workspace: its npm path corrupts `node_modules` and
+its pnpm path trips `ERR_PNPM_IGNORED_BUILDS`). Targets the `prd`
+environment (https://fss.coody.app).
 
 ### `.github/workflows/ci-worker.yaml`
 
