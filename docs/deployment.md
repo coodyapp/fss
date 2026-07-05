@@ -10,6 +10,15 @@
 | Production URL | https://fss.coody.app |
 | Deployed directory | `apps/www/dist` (Vite build) |
 
+A second, independent Worker, **`coody-fss-prd-01`** (`apps/worker`), serves
+only `https://fss.coody.app/install.sh`: it proxies
+`raw.githubusercontent.com/coodyapp/fss/main/install.sh` (edge-cached 300s)
+via a zone Route (`fss.coody.app/install.sh` on zone `coody.app`). Routes take
+precedence over both the legacy Pages project and the www Worker's custom
+domain, so the installer URL works regardless of which of those serves the
+rest of the hostname. Same pattern as sak's `coody-sak-prd-01`
+(`coody.app/install.sh`). See `apps/worker/README.md`.
+
 `apps/www/wrangler.toml` declares the custom domain:
 
 ```toml
@@ -54,6 +63,21 @@ Runs on pushes to `main` touching `apps/www/**`, `install.sh`,
 the `cd-www` concurrency group and target the `prd` environment
 (https://fss.coody.app).
 
+### `.github/workflows/ci-worker.yaml`
+
+Runs on pushes to `main`, non-draft pull requests, and manual dispatch when
+`apps/worker/**` changes: `pnpm install --frozen-lockfile`, then
+`wrangler deploy --dry-run` to validate the bundle and config.
+
+### `.github/workflows/cd-worker.yaml`
+
+Runs on pushes to `main` touching `apps/worker/**` (plus manual
+`workflow_dispatch`). Deploys `coody-fss-prd-01` with `wrangler-action`
+(`command: deploy`, `workingDirectory: apps/worker`). Serializes in the
+`cd-worker` concurrency group, targets the `prd` environment. Note that
+`install.sh` content changes do **not** need this workflow — the Worker
+fetches the script from GitHub `main` at request time.
+
 ### `.github/workflows/release.yml`
 
 Runs on `v*.*.*` tags: verifies the tag matches `FSS_VERSION` in
@@ -76,6 +100,7 @@ Already provisioned as **organization-level** secrets on `coodyapp`
 pnpm install
 pnpm build:www      # pnpm --filter www build
 pnpm deploy:www     # pnpm dlx wrangler@4 deploy --cwd apps/www
+pnpm deploy:worker  # pnpm dlx wrangler@4 deploy --cwd apps/worker (installer proxy)
 ```
 
 ## History: Pages → Worker

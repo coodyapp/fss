@@ -1,3 +1,46 @@
+# Task: coody-fss-prd-01 Worker (installer proxy, like coody-sak-prd-01)
+
+Serve `https://fss.coody.app/install.sh` from a dedicated Worker that proxies
+GitHub raw `coodyapp/fss/main/install.sh` — same pattern as sak's
+`coody-sak-prd-01` (`coody.app/install.sh`). A zone Route takes precedence
+over the Pages project currently squatting `fss.coody.app`, so the installer
+goes live immediately, before the Pages delete unblocks the www Worker.
+
+## Plan
+
+- [x] Inspect sak worker (`sak/apps/worker`) + its CI/CD workflows
+- [x] Inspect fss current state (www worker ships install.sh as static asset; live fss.coody.app is old Pages, /install.sh 404)
+- [x] Create `apps/worker/` — wrangler.toml (route `fss.coody.app/install.sh`, zone `coody.app`), worker.js, package.json, README.md
+- [x] Add `.github/workflows/ci-worker.yaml` (dry-run validate) + `cd-worker.yaml` (deploy on main push touching apps/worker)
+- [x] Root package.json: `deploy:worker` script
+- [x] Docs: deployment.md + README monorepo layout
+- [x] `wrangler deploy` → verify `curl -sI https://fss.coody.app/install.sh` → 200 text/x-shellscript
+- [x] Installer smoke test via new route
+
+## Review
+
+- Worker `coody-fss-prd-01` deployed (version 09490d00), route
+  `fss.coody.app/install.sh` live: HTTP 200, `text/x-shellscript`,
+  content byte-identical to repo `install.sh`. Site root (Pages) untouched.
+- Smoke test exposed two latent CLI bugs (pre-existing, not Worker-related);
+  both fixed locally, lint + 21/21 tests pass:
+  1. `install.sh`: mktemp workdir `fss-install.XXXXXX` matched the
+     `find -name 'fss-*'` glob used to locate the extracted tarball → SRC
+     resolved to the workdir itself → "unexpected archive layout" on every
+     `curl | sh` run. Renamed template to `fss_install.XXXXXX`.
+  2. `apps/cli/bin/fss`: FSS_HOME derived from `dirname $0` without resolving
+     the `~/.local/bin/fss` symlink → `lib/common.sh: No such file`. Added
+     POSIX symlink-resolution loop; verified via absolute + relative symlinks.
+- Live `curl | sh` still serves the pre-fix script until these changes are
+  pushed to `main` (Worker proxies GitHub raw main).
+
+## Lessons
+
+- Local `Bash` tool pipes binary data through rtk; use `rtk proxy sh -c '...'`
+  for tarball/binary pipelines.
+
+---
+
 # FSS — Fast Security Scan: Monorepo Build Plan
 
 Spec: monorepo with `apps/cli` (POSIX sh security scanner) and `apps/www`

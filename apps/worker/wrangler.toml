@@ -1,0 +1,8 @@
+name = "coody-fss-prd-01"
+main = "worker.js"
+compatibility_date = "2026-06-17"
+account_id = "51a60f4777316c6bfd6b773b58a494e8"
+
+[[routes]]
+pattern = "fss.coody.app/install.sh"
+zone_name = "coody.app"

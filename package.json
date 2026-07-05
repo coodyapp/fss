@@ -7,7 +7,8 @@
     "test": "sh apps/cli/test/run-tests.sh",
     "scan": "apps/cli/bin/fss scan .",
     "build:www": "pnpm --filter www build",
-    "deploy:www": "pnpm dlx wrangler@4 deploy --cwd apps/www"
+    "deploy:www": "pnpm dlx wrangler@4 deploy --cwd apps/www",
+    "deploy:worker": "pnpm dlx wrangler@4 deploy --cwd apps/worker"
   },
   "repository": {
     "type": "git",

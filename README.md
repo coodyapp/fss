@@ -65,11 +65,13 @@ fss/
 │   │   ├── bin/fss   # entry point / dispatcher
 │   │   ├── lib/      # scan.sh, clean.sh, outdated.sh, common.sh
 │   │   └── test/     # self-contained test suite (fixtures generated at runtime)
-│   └── www/          # fss.coody.app — Vite + React + Tailwind + shadcn/ui,
-│                     # served by a Cloudflare Worker (static assets)
+│   ├── www/          # fss.coody.app — Vite + React + Tailwind + shadcn/ui,
+│   │                 # served by a Cloudflare Worker (static assets)
+│   └── worker/       # coody-fss-prd-01 — Worker proxying install.sh from
+│                     # GitHub main (route: fss.coody.app/install.sh)
 ├── docs/             # CLI reference, www notes, deployment guide
 ├── install.sh        # curl | sh installer (served at fss.coody.app/install.sh)
-└── .github/workflows # ci-cli, ci-www, cd-www, release
+└── .github/workflows # ci-cli, ci-www, cd-www, ci-worker, cd-worker, release
 ```
 
 ## Commands
