@@ -33,27 +33,27 @@ export function Terminal({
       id={id}
       className="mx-auto flex w-full max-w-4xl scroll-mt-8 flex-col gap-3 sm:mt-0"
     >
-      <div className="terminal-screen relative min-h-32 overflow-hidden rounded-[1rem] border border-red-900/55 bg-[#060101] text-left font-mono text-sm leading-6 text-red-100 shadow-[0_0_0_1px_rgba(255,95,87,0.08),0_0_45px_rgba(190,18,60,0.16)_inset,0_24px_70px_-28px_rgba(0,0,0,0.9)]">
-        <div className="relative z-[1] flex items-center justify-between border-b border-red-900/40 px-4 py-2.5">
-          <div className="flex items-center gap-3 font-mono text-[0.65rem] tracking-[0.22em] text-red-200/70 uppercase">
+      <div className="terminal-screen relative min-h-32 overflow-hidden rounded-[1rem] border border-emerald-900/55 bg-[#010604] text-left font-mono text-sm leading-6 text-emerald-100 shadow-[0_0_0_1px_rgba(18,230,140,0.08),0_0_45px_rgba(5,150,105,0.16)_inset,0_24px_70px_-28px_rgba(0,0,0,0.9)]">
+        <div className="relative z-[1] flex items-center justify-between border-b border-emerald-900/40 px-4 py-2.5">
+          <div className="flex items-center gap-3 font-mono text-[0.65rem] tracking-[0.22em] text-emerald-200/70 uppercase">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500/50" />
-              <span className="relative inline-flex size-2.5 rounded-full bg-red-500" />
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500/50" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
             </span>
             <span>FSS CRT</span>
-            <span className="hidden text-red-300/35 sm:inline">CH-01</span>
+            <span className="hidden text-emerald-300/35 sm:inline">CH-01</span>
           </div>
-          <div className="font-mono text-[0.65rem] tracking-[0.18em] text-red-300/45 uppercase">
+          <div className="font-mono text-[0.65rem] tracking-[0.18em] text-emerald-300/45 uppercase">
             zsh feed
           </div>
         </div>
         <button
           type="button"
           onClick={copyCommands}
-          className="absolute top-14 right-3 z-10 inline-flex h-7 items-center gap-1.5 rounded border border-red-500/25 bg-red-950/25 px-2.5 font-mono text-[0.65rem] tracking-[0.16em] text-red-200/70 uppercase transition-colors hover:border-red-400/45 hover:bg-red-900/35 hover:text-red-100"
+          className="absolute top-14 right-3 z-10 inline-flex h-7 items-center gap-1.5 rounded border border-emerald-500/25 bg-emerald-950/25 px-2.5 font-mono text-[0.65rem] tracking-[0.16em] text-emerald-200/70 uppercase transition-colors hover:border-emerald-400/45 hover:bg-emerald-900/35 hover:text-emerald-100"
         >
           {copied ? (
-            <Check className="size-3.5 text-red-300" />
+            <Check className="size-3.5 text-emerald-300" />
           ) : (
             <Copy className="size-3.5" />
           )}
@@ -67,12 +67,12 @@ export function Terminal({
             >
               <span
                 aria-hidden
-                className="shrink-0 text-red-500/80 select-none"
+                className="shrink-0 text-emerald-500/80 select-none"
               >
                 &gt;
               </span>
               {typewriter ? (
-                <code className="terminal-command text-red-100 drop-shadow-[0_0_8px_rgba(255,95,87,0.35)]">
+                <code className="terminal-command text-emerald-100 drop-shadow-[0_0_8px_rgba(18,230,140,0.35)]">
                   <span className="terminal-command-ghost">{command}</span>
                   <span
                     aria-hidden
@@ -91,7 +91,7 @@ export function Terminal({
                   </span>
                 </code>
               ) : (
-                <code className="whitespace-pre text-red-100 drop-shadow-[0_0_8px_rgba(255,95,87,0.35)]">
+                <code className="whitespace-pre text-emerald-100 drop-shadow-[0_0_8px_rgba(18,230,140,0.35)]">
                   {command}
                 </code>
               )}
