@@ -4,36 +4,21 @@
 
 | | |
 |---|---|
-| Host | Cloudflare Workers (Static Assets) |
+| Host (site) | Cloudflare Pages, project `coody-fss-www-prd-01` |
+| Host (installer) | Cloudflare Worker `coody-fss-prd-01` (`apps/worker`) |
 | Account | Coody (`51a60f4777316c6bfd6b773b58a494e8`) |
-| Worker | `coody-fss-www-prd-01` |
 | Production URL | https://fss.coody.app |
 | Deployed directory | `apps/www/dist` (Vite build) |
 
-A second, independent Worker, **`coody-fss-prd-01`** (`apps/worker`), serves
-only `https://fss.coody.app/install.sh`: it proxies
+The site is a Pages project with `fss.coody.app` as its custom domain.
+
+The installer Worker, **`coody-fss-prd-01`**, serves only
+`https://fss.coody.app/install.sh`: it proxies
 `raw.githubusercontent.com/coodyapp/fss/main/install.sh` (edge-cached 300s)
-via a zone Route (`fss.coody.app/install.sh` on zone `coody.app`). Routes take
-precedence over both the legacy Pages project and the www Worker's custom
-domain, so the installer URL works regardless of which of those serves the
-rest of the hostname. Same pattern as sak's `coody-sak-prd-01`
-(`coody.app/install.sh`). See `apps/worker/README.md`.
-
-`apps/www/wrangler.toml` declares the custom domain:
-
-```toml
-[[routes]]
-pattern = "fss.coody.app"
-custom_domain = true
-
-[assets]
-directory = "./dist"
-```
-
-With `custom_domain = true`, Cloudflare provisions the DNS record and TLS
-certificate automatically on `wrangler deploy` — no manual DNS management.
-The `coody.app` zone lives in the same account, so the domain validates
-immediately.
+via a zone Route (`fss.coody.app/install.sh` on zone `coody.app`). Worker
+Routes take precedence over the Pages custom domain, so this single path is
+answered by the Worker and everything else by Pages. Same pattern as sak's
+`coody-sak-prd-01` (`coody.app/install.sh`). See `apps/worker/README.md`.
 
 ## CI/CD workflows
 
@@ -55,15 +40,13 @@ Runs on pushes to `main` and non-draft pull requests: `pnpm install
 
 ### `.github/workflows/cd-www.yaml`
 
-Runs on pushes to `main` touching `apps/www/**`, `install.sh`,
-`apps/cli/lib/common.sh` (version source), or the lockfile — plus manual
-`workflow_dispatch`. Builds the site with pnpm, then deploys with
-`pnpm dlx wrangler@4 deploy` in `apps/www` (plain wrangler, not
-`cloudflare/wrangler-action`: the action detects its package manager from
-the lockfile in `workingDirectory`, finds none there in a pnpm workspace,
-and its npm fallback breaks the pnpm-managed `node_modules`). Deploys
-serialize in the `cd-www` concurrency group and target the `prd`
-environment (https://fss.coody.app).
+Runs on `v*.*.*` tags and manual `workflow_dispatch`. Builds the site with
+`pnpm --filter www build`, then deploys `apps/www/dist` to the Pages project
+with `wrangler-action` (`pages deploy`, run from the repo root — the root
+`pnpm-lock.yaml` is what makes the action pick pnpm; don't give it a
+`workingDirectory` without a lockfile or its npm fallback breaks the
+pnpm-managed `node_modules`). Targets the `prd` environment
+(https://fss.coody.app).
 
 ### `.github/workflows/ci-worker.yaml`
 
@@ -101,22 +84,13 @@ Already provisioned as **organization-level** secrets on `coodyapp`
 ```sh
 pnpm install
 pnpm build:www      # pnpm --filter www build
-pnpm deploy:www     # pnpm dlx wrangler@4 deploy --cwd apps/www
+pnpm deploy:www     # wrangler pages deploy apps/www/dist → coody-fss-www-prd-01
 pnpm deploy:worker  # pnpm dlx wrangler@4 deploy --cwd apps/worker (installer proxy)
 ```
 
-## History: Pages → Worker
-
-v1 of the site was a zero-build static page on Cloudflare **Pages**
-(same project name). It was replaced by this Worker because Pages custom
-domains required a separate `Zone DNS: Edit` token permission to create
-the CNAME, while a Worker with `custom_domain = true` provisions DNS
-itself with only Workers permissions. The old Pages project must be
-deleted (its DNS records block the Worker's custom-domain claim —
-Cloudflare API error 100117).
-
 ## Rollback
 
-Workers keeps prior versions. Roll back from the dashboard
-(Workers & Pages → coody-fss-www-prd-01 → Deployments) or with
-`wrangler rollback`, or redeploy any earlier commit.
+Pages keeps prior deployments: dashboard → Workers & Pages →
+coody-fss-www-prd-01 → Deployments → rollback, or redeploy any earlier
+commit. The installer Worker keeps prior versions too (`wrangler rollback`
+in `apps/worker`).

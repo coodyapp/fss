@@ -66,7 +66,7 @@ fss/
 │   │   ├── lib/      # scan.sh, clean.sh, outdated.sh, common.sh
 │   │   └── test/     # self-contained test suite (fixtures generated at runtime)
 │   ├── www/          # fss.coody.app — Vite + React + Tailwind + shadcn/ui,
-│   │                 # served by a Cloudflare Worker (static assets)
+│   │                 # served by Cloudflare Pages (coody-fss-www-prd-01)
 │   └── worker/       # coody-fss-prd-01 — Worker proxying install.sh from
 │                     # GitHub main (route: fss.coody.app/install.sh)
 ├── docs/             # CLI reference, www notes, deployment guide
@@ -96,8 +96,9 @@ pnpm --filter www dev     # local dev server for fss.coody.app
 
 CI runs shellcheck, the test suite under both `dash` (Debian `/bin/sh`) and
 `bash` (macOS), and a self-scan on every push; the www app is linted,
-typechecked, and built on every push. Pushes to `main` that touch
-`apps/www/` or `install.sh` deploy the Cloudflare Worker automatically
+typechecked, and built on every push. Release tags deploy the site to
+Cloudflare Pages; `install.sh` changes go live on push to `main` because
+the installer Worker proxies it straight from GitHub
 ([docs/deployment.md](docs/deployment.md)).
 
 ## Docs

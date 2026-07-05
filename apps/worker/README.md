@@ -2,14 +2,14 @@
 
 This deploys a small Cloudflare Worker, **`coody-fss-prd-01`**, that
 intercepts only `fss.coody.app/install.sh` and proxies it from this repo's
-`main` branch on GitHub. It is a separate Worker from `coody-fss-www-prd-01`
-(which serves the https://fss.coody.app site) and only ever attaches a Route
-on the single path above — the rest of the hostname is untouched.
+`main` branch on GitHub. It is independent of the `coody-fss-www-prd-01`
+Pages project (which serves the https://fss.coody.app site) and only ever
+attaches a Route on the single path above — the rest of the hostname is
+untouched.
 
-Because it is a zone **Route** (not a custom domain), it takes precedence
-over whatever currently serves `fss.coody.app` — including the legacy Pages
-project and, later, the `coody-fss-www-prd-01` Worker once its custom-domain
-claim goes through. The installer URL works either way.
+Because it is a zone **Route**, it takes precedence over the Pages custom
+domain for that path, so the installer URL is always answered by this
+Worker.
 
 ## Deploy
 
