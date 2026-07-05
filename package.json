@@ -3,17 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "description": "A Fast Security Scan for developers.",
-  "workspaces": [
-    "apps/www"
-  ],
   "scripts": {
     "test": "sh apps/cli/test/run-tests.sh",
     "scan": "apps/cli/bin/fss scan .",
-    "deploy:www": "npm run deploy --workspace @fss/www"
+    "build:www": "pnpm --filter www build",
+    "deploy:www": "pnpm dlx wrangler@4 deploy --cwd apps/www"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/coodyapp/fss.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.10.0",
+      "onFail": "download"
+    }
+  }
 }
