@@ -37,7 +37,9 @@ say "Downloading fss (main) ..."
 fetch "$REPO_TARBALL" | tar -xzf - -C "$WORK" || die "download failed"
 
 SRC="$(find "$WORK" -maxdepth 1 -type d -name 'fss-*' | head -n 1)"
-[ -n "$SRC" ] && [ -d "$SRC/apps/cli" ] || die "unexpected archive layout"
+if [ -z "$SRC" ] || [ ! -d "$SRC/apps/cli" ]; then
+  die "unexpected archive layout"
+fi
 
 say "Installing to $FSS_DIR ..."
 rm -rf "$FSS_DIR"
