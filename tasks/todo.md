@@ -33,6 +33,10 @@ goes live immediately, before the Pages delete unblocks the www Worker.
      POSIX symlink-resolution loop; verified via absolute + relative symlinks.
 - Live `curl | sh` still serves the pre-fix script until these changes are
   pushed to `main` (Worker proxies GitHub raw main).
+- 2026-07-05 follow-up: pushed + verified live end to end. Architecture
+  settled as Pages (site, coody-fss-www-prd-01) + Worker (installer,
+  coody-fss-prd-01); cd-www deploys to Pages on release tags; green
+  hopper theme live on fss.coody.app.
 
 ## Lessons
 
