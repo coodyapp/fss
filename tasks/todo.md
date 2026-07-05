@@ -67,6 +67,39 @@ sources for the CLI (IOC lists, check structure, exit codes, cleanup UX).
   Zone DNS:Edit on coody.app and re-run deploy (workflow self-heals), or
   add the proxied CNAME fss → coody-fss-www-prd-01.pages.dev in dashboard.
 
+## Phase 2 — rebuild on SAK examples (tmp/www, tmp/workflows, tmp/worker)
+
+User provided sibling-project (SAK) examples in `tmp/`; rebuilt to match
+the Coody house style.
+
+- [x] apps/www rebuilt: Vite + React + TS + Tailwind 4 + shadcn/ui from
+  tmp/www template; headline unchanged; FSS ASCII logo; install command +
+  usage terminals; version badge read at build time from
+  `FSS_VERSION` in apps/cli/lib/common.sh (vite define)
+- [x] Cloudflare architecture: Pages → **Worker Static Assets**
+  (`wrangler.toml`: name coody-fss-www-prd-01, `[[routes]]`
+  fss.coody.app `custom_domain = true`, `[assets] dist/`) — Worker
+  provisions DNS/cert itself, removing the Zone DNS:Edit blocker
+- [x] `install.sh` (repo root): POSIX installer → ~/.fss + ~/.local/bin
+  symlink; shipped into dist/ by a vite plugin, served at
+  fss.coody.app/install.sh
+- [x] pnpm workspace (pnpm-workspace.yaml + committed pnpm-lock.yaml)
+- [x] Workflows split per app: ci-cli.yaml, ci-www.yaml, cd-www.yaml
+  (wrangler-action@v3), release.yml (tag ↔ FSS_VERSION check); old
+  ci.yml + deploy-www.yml deleted
+- [x] Verify: lint OK, typecheck OK, shellcheck OK (incl. install.sh),
+  21/21 tests, www build OK (dist/ contains install.sh)
+- [x] Worker deployed (assets uploaded)
+- [ ] **BLOCKED (needs user):** fss.coody.app custom-domain claim fails —
+  CF API 409, error 100117: hostname already has DNS records, created by
+  the old v1 Pages deployment (old static site is live there). Fix:
+  delete Pages project `coody-fss-www-prd-01`
+  (`npx wrangler@4 pages project delete coody-fss-www-prd-01`) then
+  re-run deploy. Deleting a live production project was denied to the
+  agent in auto mode — user must run/approve it.
+- [x] Docs updated: docs/www.md, docs/deployment.md, README.md
+- [x] Commit + push; monitor ci-cli / ci-www / cd-www
+
 ## Lessons
 
 - POSIX sh: `while` in a pipeline = subshell = lost state. Design loops
@@ -76,3 +109,8 @@ sources for the CLI (IOC lists, check structure, exit codes, cleanup UX).
 - Generate malicious-looking test fixtures at runtime instead of committing
   them — keeps the repo clean for GitHub scanning and other people's
   security tooling (including our own self-scan in CI).
+- `devEngines.packageManager: pnpm` makes bare `npx` fail with
+  EBADDEVENGINES — use `pnpm dlx` in scripts instead.
+- Workers custom domains refuse hostnames with pre-existing DNS records
+  (API error 100117) — migrating Pages → Worker on the same hostname
+  requires deleting the Pages custom domain/records first.

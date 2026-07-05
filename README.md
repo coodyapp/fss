@@ -30,7 +30,16 @@ FSS takes the opposite approach — the scanner itself adds nothing to your
 supply chain. It's readable shell, using only tools already on your machine:
 `sh`, `grep`, `find`, `curl`/`wget`.
 
-## Quick start
+## Install
+
+```sh
+curl -fsSL https://fss.coody.app/install.sh | sh
+```
+
+Installs to `~/.fss` and symlinks `fss` into `~/.local/bin` — no root, no
+dependencies. (Read [install.sh](install.sh) first if you like; it's short.)
+
+Or run straight from a clone:
 
 ```sh
 git clone https://github.com/coodyapp/fss.git
@@ -47,12 +56,6 @@ apps/cli/bin/fss clean ~/projects --yes
 apps/cli/bin/fss outdated ~/projects/my-app
 ```
 
-Optional: put it on your PATH.
-
-```sh
-ln -s "$PWD/apps/cli/bin/fss" /usr/local/bin/fss
-```
-
 ## Monorepo layout
 
 ```
@@ -62,10 +65,11 @@ fss/
 │   │   ├── bin/fss   # entry point / dispatcher
 │   │   ├── lib/      # scan.sh, clean.sh, outdated.sh, common.sh
 │   │   └── test/     # self-contained test suite (fixtures generated at runtime)
-│   └── www/          # fss.coody.app — static site, zero JS, strict CSP
-│       └── public/   # deployed as-is to Cloudflare Pages
+│   └── www/          # fss.coody.app — Vite + React + Tailwind + shadcn/ui,
+│                     # served by a Cloudflare Worker (static assets)
 ├── docs/             # CLI reference, www notes, deployment guide
-└── .github/workflows # ci.yml (lint+test), deploy-www.yml (Cloudflare Pages)
+├── install.sh        # curl | sh installer (served at fss.coody.app/install.sh)
+└── .github/workflows # ci-cli, ci-www, cd-www, release
 ```
 
 ## Commands
@@ -81,13 +85,17 @@ Full reference: [docs/cli.md](docs/cli.md)
 ## Development
 
 ```sh
-npm test          # or: sh apps/cli/test/run-tests.sh
-npm run scan      # dogfood: fss scans this repo
+pnpm test         # or: sh apps/cli/test/run-tests.sh
+pnpm scan         # dogfood: fss scans this repo
+
+pnpm install              # www workspace
+pnpm --filter www dev     # local dev server for fss.coody.app
 ```
 
 CI runs shellcheck, the test suite under both `dash` (Debian `/bin/sh`) and
-`bash` (macOS), and a self-scan on every push. Pushes to `main` that touch
-`apps/www/` deploy to Cloudflare Pages automatically
+`bash` (macOS), and a self-scan on every push; the www app is linted,
+typechecked, and built on every push. Pushes to `main` that touch
+`apps/www/` or `install.sh` deploy the Cloudflare Worker automatically
 ([docs/deployment.md](docs/deployment.md)).
 
 ## Docs

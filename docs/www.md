@@ -1,50 +1,56 @@
 # apps/www — fss.coody.app
 
-Static landing page for FSS. Headline: **"A Fast Security Scan for
+Landing page for FSS. Headline: **"A Fast Security Scan for
 developers."**
 
-## Design constraints
+## Stack
 
-The site practices what the CLI preaches:
+Vite + React + TypeScript + Tailwind CSS 4 +
+[shadcn/ui](https://ui.shadcn.com), following the Coody house style. The
+build output (`dist/`) is served as static assets by a dedicated
+Cloudflare **Worker**, `coody-fss-www-prd-01`, via
+[Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
+— there is no server-side code, only assets.
 
-- **Zero JavaScript.** Nothing to execute, nothing to compromise.
-- **Zero build step.** `apps/www/public/` is deployed byte-for-byte. No
-  bundler, no framework, no npm dependencies — the www workspace's only
-  script is the deploy command.
-- **No external assets.** System font stack, inline SVG favicon (data URI).
-  Every request stays on the origin.
-- **Strict security headers** via Cloudflare Pages' `_headers` file:
-  `default-src 'none'` CSP (only self-hosted styles and images allowed),
-  `nosniff`, `DENY` framing, HSTS, COOP/CORP.
+Two build-time integrations keep the CLI as the single source of truth:
+
+- **Version badge** — `vite.config.ts` reads `FSS_VERSION` from
+  `apps/cli/lib/common.sh` and injects it as
+  `import.meta.env.VITE_FSS_VERSION`.
+- **Installer** — the repo-root `install.sh` is copied into `dist/` at
+  build time, so `curl -fsSL https://fss.coody.app/install.sh | sh`
+  serves the installer from the same Worker.
 
 ## Files
 
 ```
 apps/www/
-├── package.json      # name + deploy script only
-└── public/
-    ├── index.html    # single-page: hero, terminal demo, commands, why
-    ├── styles.css    # dark terminal theme, responsive grid
-    ├── 404.html
-    └── _headers      # Cloudflare Pages security headers
+├── wrangler.toml        # Worker name, custom domain, [assets] dist/
+├── vite.config.ts       # version injection + install.sh copy plugin
+├── index.html           # meta tags, title
+└── src/
+    ├── App.tsx          # hero, install command, usage terminals
+    ├── components/      # terminal, site-footer, theme-provider, ui/
+    ├── index.css        # Tailwind theme (CRT/terminal look)
+    └── main.tsx
 ```
 
-## Local preview
-
-Any static file server works:
+## Develop
 
 ```sh
-cd apps/www/public && python3 -m http.server 8080
-# or, with headers applied like production:
-npx wrangler pages dev apps/www/public
+pnpm install
+pnpm --filter www dev        # local dev server
+pnpm --filter www lint
+pnpm --filter www typecheck
+pnpm --filter www build      # tsc -b && vite build → dist/
 ```
 
 ## Deploy
 
-Automatic on push to `main` touching `apps/www/**` (see
-[deployment.md](deployment.md)), or manually:
+Automatic on push to `main` touching `apps/www/**`, `install.sh`, or the
+CLI version (see [deployment.md](deployment.md)), or manually from the
+repo root:
 
 ```sh
-npm run deploy:www
-# = npx wrangler pages deploy apps/www/public --project-name coody-fss-www-prd-01
+pnpm build:www && pnpm deploy:www
 ```
