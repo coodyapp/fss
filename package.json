@@ -15,12 +15,5 @@
     "url": "https://github.com/coodyapp/fss.git"
   },
   "license": "MIT",
-  "packageManager": "pnpm@11.10.0",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.10.0",
-      "onFail": "download"
-    }
-  }
+  "packageManager": "pnpm@11.10.0"
 }
