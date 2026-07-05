@@ -1,0 +1,45 @@
+name: CI — CLI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck dash
+
+      - name: Syntax check (dash = Debian /bin/sh, bash = macOS)
+        run: |
+          for f in apps/cli/bin/fss apps/cli/lib/*.sh apps/cli/test/run-tests.sh install.sh; do
+            dash -n "$f"
+            bash -n "$f"
+          done
+
+      - name: ShellCheck
+        run: shellcheck -s sh apps/cli/bin/fss apps/cli/lib/*.sh apps/cli/test/run-tests.sh install.sh
+
+      - name: Run tests (dash)
+        run: dash apps/cli/test/run-tests.sh
+
+      - name: Run tests (bash)
+        run: bash apps/cli/test/run-tests.sh
+
+      - name: Self-scan (dogfood, hermetic HOME)
+        run: HOME="$(mktemp -d)" apps/cli/bin/fss scan .
