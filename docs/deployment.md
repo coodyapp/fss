@@ -58,10 +58,12 @@ Runs on pushes to `main` and non-draft pull requests: `pnpm install
 Runs on pushes to `main` touching `apps/www/**`, `install.sh`,
 `apps/cli/lib/common.sh` (version source), or the lockfile — plus manual
 `workflow_dispatch`. Builds the site with pnpm, then deploys with
-[`cloudflare/wrangler-action`](https://github.com/cloudflare/wrangler-action)
-(`command: deploy`, `workingDirectory: apps/www`). Deploys serialize in
-the `cd-www` concurrency group and target the `prd` environment
-(https://fss.coody.app).
+`pnpm dlx wrangler@4 deploy` in `apps/www` (plain wrangler, not
+`cloudflare/wrangler-action`: the action detects its package manager from
+the lockfile in `workingDirectory`, finds none there in a pnpm workspace,
+and its npm fallback breaks the pnpm-managed `node_modules`). Deploys
+serialize in the `cd-www` concurrency group and target the `prd`
+environment (https://fss.coody.app).
 
 ### `.github/workflows/ci-worker.yaml`
 
@@ -72,8 +74,8 @@ Runs on pushes to `main`, non-draft pull requests, and manual dispatch when
 ### `.github/workflows/cd-worker.yaml`
 
 Runs on pushes to `main` touching `apps/worker/**` (plus manual
-`workflow_dispatch`). Deploys `coody-fss-prd-01` with `wrangler-action`
-(`command: deploy`, `workingDirectory: apps/worker`). Serializes in the
+`workflow_dispatch`). Deploys `coody-fss-prd-01` with
+`pnpm dlx wrangler@4 deploy` in `apps/worker`. Serializes in the
 `cd-worker` concurrency group, targets the `prd` environment. Note that
 `install.sh` content changes do **not** need this workflow — the Worker
 fetches the script from GitHub `main` at request time.

@@ -43,10 +43,8 @@ jobs:
         run: pnpm --filter www build
 
       - name: Deploy Worker (prd)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/www
-          command: deploy
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: apps/www
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm dlx wrangler@4 deploy
