@@ -30,7 +30,10 @@ cmd_update() {
 
   work="$(mktemp -d "${TMPDIR:-/tmp}/fss_update.XXXXXX")" || die "cannot create temp dir"
   stage="$(mktemp -d "${TMPDIR:-/tmp}/fss_stage.XXXXXX")" || die "cannot create temp dir"
-  trap 'rm -rf "$work" "$stage"' EXIT INT TERM
+  # Bake the paths into the trap: it fires at EXIT, after this function's
+  # locals are gone (set -u would report them unbound).
+  # shellcheck disable=SC2064  # early expansion intentional
+  trap "rm -rf '$work' '$stage'" EXIT INT TERM
 
   http_get "https://codeload.github.com/coodyapp/fss/tar.gz/refs/tags/$tag" \
     | tar -xzf - -C "$work" || die "download failed"

@@ -2,7 +2,7 @@
 # common.sh — shared helpers for fss. POSIX sh only (dash, macOS sh, bash).
 
 # shellcheck disable=SC2034  # consumed by bin/fss after sourcing
-FSS_VERSION="0.2.0"
+FSS_VERSION="0.2.1"
 
 # ── Colors (honor NO_COLOR and non-tty output) ────────────────────────────────
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
