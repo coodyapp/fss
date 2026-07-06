@@ -44,6 +44,7 @@ Options:
 Environment:
   NO_COLOR=1                Disable colored output
   FSS_OFFLINE=1             Skip registry lookups in 'outdated'
+  FSS_NO_ANIMATION=1        Disable the welcome banner animation
 
 Exit codes:
   scan:     0 clean, 1 warnings, 2 critical findings, 3 error
@@ -52,7 +53,12 @@ Exit codes:
 EOF
 }
 
-[ $# -ge 1 ] || { usage; exit 3; }
+# Bare `fss`: animated welcome banner (logo + info box + usage), like sak.
+if [ $# -eq 0 ]; then
+  . "$FSS_HOME/lib/banner.sh"
+  render_banner
+  exit 0
+fi
 
 cmd="$1"
 shift

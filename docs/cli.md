@@ -22,7 +22,13 @@ Options:
 Environment:
   NO_COLOR=1                Disable colored output
   FSS_OFFLINE=1             Skip registry lookups in 'outdated'
+  FSS_NO_ANIMATION=1        Disable the welcome banner animation
 ```
+
+Running bare `fss` (no subcommand) shows an animated welcome banner — the
+ASCII logo, an info box, and usage. The line-by-line reveal only happens on
+an interactive terminal; it is disabled when output is piped or when
+`NO_COLOR`, `CI`, or `FSS_NO_ANIMATION` is set.
 
 ## fss scan
 

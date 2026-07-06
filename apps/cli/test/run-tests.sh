@@ -153,6 +153,13 @@ fi
 
 OUT="$WORK/out"
 
+# ── banner (bare fss) ─────────────────────────────────────────────────────────
+"$FSS" > "$OUT" 2>&1
+check "banner: bare fss exits 0" 0 $?
+check_grep "banner: shows ascii logo" '█████' "$OUT"
+check_grep "banner: shows welcome box tip" 'New here? Run: fss scan' "$OUT"
+check_grep "banner: shows usage after logo" 'Usage: fss <command>' "$OUT"
+
 # ── CLI basics ────────────────────────────────────────────────────────────────
 "$FSS" --help > "$OUT" 2>&1;    check "help exits 0" 0 $?
 check_grep "help mentions all commands" 'scan.*\[dir\]' "$OUT"

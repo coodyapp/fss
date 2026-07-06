@@ -11,9 +11,12 @@ if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   YEL="$(printf '\033[33m')"
   CYN="$(printf '\033[36m')"
   BLD="$(printf '\033[1m')"
+  # shellcheck disable=SC2034  # consumed by lib/banner.sh after sourcing
+  DIM="$(printf '\033[2m')"
   RST="$(printf '\033[0m')"
 else
-  RED=""; GRN=""; YEL=""; CYN=""; BLD=""; RST=""
+  # shellcheck disable=SC2034
+  RED=""; GRN=""; YEL=""; CYN=""; BLD=""; DIM=""; RST=""
 fi
 
 # ── Finding counters ──────────────────────────────────────────────────────────
