@@ -47,6 +47,28 @@ _welcome_box() {
   printf '└%s┴%s┘\n' "$(_repeat '─' "$left")" "$(_repeat '─' "$right")"
 }
 
+# Update notice: report a newer release found by a previous background check
+# (reading the cache is offline-safe), then refresh the cache at most once a
+# day without ever blocking the banner. Skipped entirely in checkouts.
+_update_notice() {
+  local cache="$FSS_HOME/.update-check" latest=""
+  fss_is_checkout && return 0
+
+  [ -f "$cache" ] && IFS= read -r latest < "$cache"
+  if [ -n "$latest" ] && [ "$latest" != "$FSS_VERSION" ]; then
+    printf '%s  Update available: v%s — run: fss update%s\n\n' "$YEL" "$latest" "$RST"
+  fi
+
+  [ "${FSS_OFFLINE:-0}" = "1" ] && return 0
+  if [ ! -f "$cache" ] || [ -n "$(find "$cache" -mtime +0 2>/dev/null)" ]; then
+    (
+      tag="$(http_get "$FSS_LATEST_RELEASE_API" | json_tag_name)"
+      [ -n "$tag" ] && printf '%s\n' "${tag#v}" > "$cache"
+    ) >/dev/null 2>&1 &
+  fi
+  return 0
+}
+
 render_banner() {
   local animate=0 logo
   fss_animate && animate=1
@@ -66,6 +88,7 @@ render_banner() {
   echo
   _reveal "$(_welcome_box "$FSS_VERSION")" "$DIM" "$animate"
   echo
+  _update_notice
   _reveal "$(usage)" '' "$animate"
   return 0
 }

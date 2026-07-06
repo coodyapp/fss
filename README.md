@@ -81,6 +81,7 @@ fss/
 | `fss scan [dir]` | 7 check groups: lifecycle scripts, known payload files, malware code signatures, credential exposure, registry/lockfile integrity, rogue binaries, host persistence | 0 clean · 1 warnings · 2 critical · 3 error |
 | `fss clean [dir] [--dry-run] [--yes]` | Finds `node_modules` dirs with sizes, deletes after confirmation. Never follows symlinks. | 0 ok · 3 error |
 | `fss outdated [dir]` | Installed vs latest registry versions, highlights major drift | 0 current · 1 outdated · 3 error |
+| `fss update` | Self-update an installed fss to the latest GitHub release | 0 ok · 3 error |
 
 Full reference: [docs/cli.md](docs/cli.md)
 

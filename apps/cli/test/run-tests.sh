@@ -160,6 +160,22 @@ check_grep "banner: shows ascii logo" '█████' "$OUT"
 check_grep "banner: shows welcome box tip" 'New here? Run: fss scan' "$OUT"
 check_grep "banner: shows usage after logo" 'Usage: fss <command>' "$OUT"
 
+# ── update ────────────────────────────────────────────────────────────────────
+"$FSS" update > "$OUT" 2>&1
+check "update: refuses to run from a checkout" 3 $?
+check_grep "update: points checkout users to git pull" 'git pull' "$OUT"
+
+# Simulated installed copy (no repo .git above it) with a cached newer version.
+mkdir -p "$WORK/fss-home"
+cp -R "$TEST_DIR/../bin" "$TEST_DIR/../lib" "$WORK/fss-home/"
+printf '9.9.9\n' > "$WORK/fss-home/.update-check"
+FSS_OFFLINE=1 "$WORK/fss-home/bin/fss" > "$OUT" 2>&1
+check "update: banner exits 0 with cached notice" 0 $?
+check_grep "update: banner shows cached update notice" 'Update available: v9\.9\.9' "$OUT"
+
+FSS_OFFLINE=1 "$WORK/fss-home/bin/fss" update > "$OUT" 2>&1
+check "update: FSS_OFFLINE refuses to update" 3 $?
+
 # ── CLI basics ────────────────────────────────────────────────────────────────
 "$FSS" --help > "$OUT" 2>&1;    check "help exits 0" 0 $?
 check_grep "help mentions all commands" 'scan.*\[dir\]' "$OUT"

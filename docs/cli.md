@@ -111,6 +111,20 @@ $ fss outdated .
 
 **Exit codes:** `0` all current · `1` outdated found · `3` error.
 
+## fss update
+
+Updates an installed fss (`~/.fss`) to the latest GitHub release: resolves
+the newest tag from the GitHub API, downloads that tag's tarball, stages
+`bin/` + `lib/` in a fresh directory, and swaps it in with `mv` (never
+overwriting the running script in place). Refuses to run from a git
+checkout (use `git pull`) or with `FSS_OFFLINE=1`.
+
+Bare `fss` also checks for new releases in the background at most once a
+day (cached in `~/.fss/.update-check`, never blocking) and prints an
+`Update available` notice when one exists.
+
+**Exit codes:** `0` updated or already current · `3` error.
+
 ## Tests
 
 ```sh

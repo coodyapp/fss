@@ -2,7 +2,7 @@
 # common.sh — shared helpers for fss. POSIX sh only (dash, macOS sh, bash).
 
 # shellcheck disable=SC2034  # consumed by bin/fss after sourcing
-FSS_VERSION="0.1.0"
+FSS_VERSION="0.2.0"
 
 # ── Colors (honor NO_COLOR and non-tty output) ────────────────────────────────
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
@@ -30,8 +30,22 @@ warn() { printf '  %s⚠%s  %s\n' "$YEL" "$RST" "$*"; WARN_COUNT=$((WARN_COUNT +
 crit() { printf '  %s✖%s  %s\n' "$RED" "$RST" "$*"; CRIT_COUNT=$((CRIT_COUNT + 1)); }
 die()  { printf '%serror:%s %s\n' "$RED" "$RST" "$*" >&2; exit 3; }
 
+# shellcheck disable=SC2034  # consumed by lib/update.sh and lib/banner.sh
+FSS_LATEST_RELEASE_API="https://api.github.com/repos/coodyapp/fss/releases/latest"
+
 # ── Utilities ─────────────────────────────────────────────────────────────────
 has() { command -v "$1" >/dev/null 2>&1; }
+
+# True when running from a git checkout (repo apps/cli) rather than an
+# installed copy (~/.fss).
+fss_is_checkout() {
+  [ -d "$FSS_HOME/../../.git" ] || [ -d "$FSS_HOME/../.git" ]
+}
+
+# Extract the "tag_name" field from GitHub release JSON on stdin.
+json_tag_name() {
+  sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1
+}
 
 # Kilobytes → human-readable size.
 human_kb() {

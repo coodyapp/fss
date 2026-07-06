@@ -36,6 +36,7 @@ Commands:
   clean [dir] [--dry-run] [--yes]
                             Find and safely delete node_modules directories
   outdated [dir]            Check dependency versions against the npm registry
+  update                    Update fss to the latest release
 
 Options:
   -h, --help                Show this help
@@ -75,6 +76,10 @@ case "$cmd" in
   outdated)
     . "$FSS_HOME/lib/outdated.sh"
     cmd_outdated "$@"
+    ;;
+  update)
+    . "$FSS_HOME/lib/update.sh"
+    cmd_update
     ;;
   -h|--help|help)
     usage
