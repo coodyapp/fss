@@ -79,6 +79,79 @@ Already provisioned as **organization-level** secrets on `coodyapp`
 | `CLOUDFLARE_API_TOKEN` | API token with **Workers Scripts: Edit** (deploy + custom domain) |
 | `CLOUDFLARE_ACCOUNT_ID` | `51a60f4777316c6bfd6b773b58a494e8` |
 
+## Agent readiness
+
+Most of it ships with the site, from `apps/www/public/` (see
+[www.md](www.md#agent-readiness)): `robots.txt` (RFC 9309 groups, explicit AI
+crawler entries, `Content-Signal`), `sitemap.xml` (generated at build time),
+`llms.txt`, and `_headers` (RFC 8288 `Link` headers on `/`). Those need no
+Cloudflare configuration — deploy and they are live.
+
+Two items are zone-level and are **not** in this repo.
+
+### Markdown for Agents (manual, one-off)
+
+Serves a Markdown rendering of the page to clients that send
+`Accept: text/markdown`. It is a Cloudflare zone setting on `coody.app`, needs
+a **Pro or Business** plan, and an API token with **Zone Settings: Edit** —
+the CI token only has Workers/Pages scopes, so this cannot be automated from
+here. Dashboard equivalent: zone → **AI Crawl Control** → enable **Markdown
+for Agents**.
+
+```sh
+export CF_TOKEN=...   # Zone Settings: Edit + Zone: Read on coody.app
+ZONE_ID=$(curl -sS -H "Authorization: Bearer $CF_TOKEN" \
+  "https://api.cloudflare.com/client/v4/zones?name=coody.app" \
+  | jq -r '.result[0].id')
+
+# Whole zone (coody.app and every subdomain):
+curl -X PATCH \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/settings/content_converter" \
+  -H "Authorization: Bearer $CF_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data-raw '{"value":"on"}'
+```
+
+To scope it to `fss.coody.app` only, use a configuration rule instead. Note
+that `PUT` on a phase entrypoint **replaces every rule in that phase** — `GET`
+it first and merge, or you will silently drop existing configuration rules:
+
+```sh
+curl -sS -H "Authorization: Bearer $CF_TOKEN" \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/rulesets/phases/http_config_settings/entrypoint"
+
+curl -X PUT \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/rulesets/phases/http_config_settings/entrypoint" \
+  -H "Authorization: Bearer $CF_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"rules":[{
+    "expression": "http.host eq \"fss.coody.app\"",
+    "action": "set_config",
+    "action_parameters": { "content_converter": true },
+    "description": "Markdown for Agents — fss.coody.app"
+  }]}'
+```
+
+Verify:
+
+```sh
+curl -sI -H "Accept: text/markdown" https://fss.coody.app/ \
+  | grep -iE 'content-type|x-markdown-tokens'
+# want: content-type: text/markdown; charset=utf-8
+```
+
+### DNS-AID — deliberately not published
+
+[DNS for AI Discovery](https://datatracker.ietf.org/doc/draft-mozleywilliams-dnsop-dnsaid/)
+advertises agent endpoints via SVCB records under `_agents` (for example
+`_index._agents.fss.coody.app`). FSS is a CLI: it exposes no agent, no MCP
+server and no A2A endpoint, so there is nothing for such a record to resolve
+to. Publishing one would point agents at a service that does not exist, so we
+do not. Agent-readiness scanners will flag this as a miss; that is the
+intended answer until FSS actually ships an agent surface, at which point
+publish `_mcp._agents.fss.coody.app` SVCB records and sign the zone with
+DNSSEC.
+
 ## Manual deploy
 
 ```sh

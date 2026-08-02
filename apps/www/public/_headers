@@ -1,0 +1,27 @@
+# Cloudflare Pages custom headers
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# RFC 8288 Link headers point agents at this site's machine-readable entry
+# points without them having to parse the SPA's HTML first. Pages joins
+# repeated header names with a comma, which is exactly RFC 8288's list form.
+#
+# Only IANA-registered relation types are used:
+#   canonical    RFC 6596
+#   describedby  https://www.w3.org/TR/powder-dr/#assoc-linking
+#   service-doc  RFC 8631
+#   license      RFC 4946
+#
+# There is no api-catalog / service-desc entry because FSS is a CLI, not a
+# hosted API — advertising one would point agents at nothing.
+
+/
+  Link: <https://fss.coody.app/>; rel="canonical"
+  Link: </llms.txt>; rel="describedby"; type="text/plain"
+  Link: <https://github.com/coodyapp/fss>; rel="service-doc"; type="text/html"
+  Link: <https://github.com/coodyapp/fss/blob/main/LICENSE>; rel="license"
+
+/index.html
+  Link: <https://fss.coody.app/>; rel="canonical"
+  Link: </llms.txt>; rel="describedby"; type="text/plain"
+  Link: <https://github.com/coodyapp/fss>; rel="service-doc"; type="text/html"
+  Link: <https://github.com/coodyapp/fss/blob/main/LICENSE>; rel="license"

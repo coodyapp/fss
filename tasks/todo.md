@@ -1,3 +1,51 @@
+# Task: Agent readiness for fss.coody.app
+
+Seven findings from an agent-readiness scan (isitagentready.com): missing
+robots.txt, sitemap.xml, Link headers, DNS-AID records, Markdown negotiation,
+AI crawler rules, Content Signals.
+
+Root cause for the first three: the site is an SPA on Cloudflare Pages, so
+`/robots.txt` and `/sitemap.xml` were answered by the `index.html` fallback —
+HTTP 200 but `text/html`, which every scanner reads as "not found".
+
+## Decisions
+
+- **Crawl policy: open to everything.** FSS is an open-source CLI; the site is
+  documentation we want indexed, summarised and answered from.
+  `Content-Signal: ai-train=yes, search=yes, ai-input=yes` in every group.
+- **`Content-Signal` repeated per group.** RFC 9309: a crawler obeys only its
+  most specific matching group, so a signal in `User-agent: *` alone never
+  reaches GPTBot. Verbose but correct, and safe for naive parsers.
+- **Link headers use IANA-registered relations only** (`canonical`,
+  `describedby`, `service-doc`, `license`). No `api-catalog` / `service-desc`:
+  FSS is a CLI with no hosted API, so those would point at nothing.
+- **Sitemap generated at build time**, `<lastmod>` = HEAD commit date, so it
+  cannot rot.
+- **DNS-AID skipped on purpose.** `_agents` SVCB records advertise agent
+  endpoints; FSS has none. Documented in deployment.md rather than faked.
+- **Markdown for Agents left to the user.** Zone-level Cloudflare setting on
+  `coody.app`, needs Pro/Business + a Zone Settings: Edit token; the local
+  wrangler OAuth is `zone (read)`. Runbook shipped in deployment.md.
+
+## Plan
+
+- [x] `apps/www/public/robots.txt` — RFC 9309 groups, 23 explicit crawlers,
+      Content-Signal per group, Sitemap pointer
+- [x] `apps/www/public/llms.txt` — llms.txt summary (target of `describedby`)
+- [x] `apps/www/public/_headers` — RFC 8288 Link headers on `/`
+- [x] `vite.config.ts` — `emitSitemap()` plugin
+- [x] `index.html` — canonical link
+- [x] Docs: www.md (agent-readiness table, Pages-not-Worker correction),
+      deployment.md (zone runbook + DNS-AID rationale)
+- [x] Local verify: build, lint, typecheck
+- [ ] Deploy + live verify (`curl` content-types, isitagentready rescan)
+
+## Review
+
+_pending deploy_
+
+---
+
 # Task: coody-fss-prd-01 Worker (installer proxy, like coody-sak-prd-01)
 
 Serve `https://fss.coody.app/install.sh` from a dedicated Worker that proxies

@@ -1,0 +1,51 @@
+# FSS — A Fast Security Scan for developers
+
+> FSS scans Node.js projects for security issues and supply-chain attack
+> indicators, cleans `node_modules` safely, and flags outdated dependencies.
+> One POSIX shell script, zero runtime dependencies, on macOS and
+> Debian-based Linux. MIT licensed, by Coody.
+
+Install:
+
+```sh
+curl -fsSL https://fss.coody.app/install.sh | sh
+```
+
+The installer places the CLI in `~/.fss` and symlinks it into `~/.local/bin`.
+It is short enough to audit before running.
+
+## Commands
+
+- `fss scan [dir]` — seven check groups: lifecycle scripts, known payload
+  files, malware code signatures, credential exposure, registry/lockfile
+  integrity, rogue binaries, host persistence.
+  Exit codes: 0 clean, 1 warnings, 2 critical, 3 error.
+- `fss clean [dir] [--dry-run] [--yes]` — lists `node_modules` directories
+  with sizes and deletes them after confirmation. Never follows symlinks.
+  Exit codes: 0 ok, 3 error.
+- `fss outdated [dir]` — compares installed versions against the npm
+  registry and highlights major drift. Exit codes: 0 current, 1 outdated,
+  3 error.
+- `fss update` — self-updates an installed FSS to the latest GitHub release.
+  Exit codes: 0 ok, 3 error.
+
+Exit codes are CI-ready: `0` clean, `1` warnings, `2` critical.
+
+## Docs
+
+- [Source repository](https://github.com/coodyapp/fss): monorepo — CLI,
+  website, and installer Worker.
+- [README](https://github.com/coodyapp/fss/blob/main/README.md): overview,
+  install, command table.
+- [CLI reference](https://github.com/coodyapp/fss/blob/main/docs/cli.md):
+  every command, flag, check group and exit code.
+- [Installer](https://fss.coody.app/install.sh): the exact script that
+  `curl | sh` runs.
+
+## Optional
+
+- [Web app notes](https://github.com/coodyapp/fss/blob/main/docs/www.md):
+  how fss.coody.app is built.
+- [Deployment & CI/CD](https://github.com/coodyapp/fss/blob/main/docs/deployment.md):
+  Cloudflare Pages + Worker topology, release workflow.
+- [License](https://github.com/coodyapp/fss/blob/main/LICENSE): MIT.

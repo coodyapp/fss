@@ -1,0 +1,120 @@
+# robots.txt for https://fss.coody.app
+# Robots Exclusion Protocol — https://www.rfc-editor.org/rfc/rfc9309
+#
+# FSS is an open-source CLI. Everything published here is documentation we
+# want read, indexed, summarised and answered from — by humans, search
+# engines and AI agents alike. There is nothing to withhold, so every group
+# below is a plain "Allow: /".
+#
+# Content-Signal declares how the content may be used
+# (https://contentsignals.org/):
+#   search    building a search index and returning links + excerpts
+#   ai-input  feeding content to an AI model at query time (RAG, grounding)
+#   ai-train  training or fine-tuning AI models
+#
+# Per RFC 9309 a crawler obeys exactly one group — the most specific one that
+# matches its product token — so the signal is repeated in every group rather
+# than inherited from the wildcard.
+
+User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+# --- Search engines ---------------------------------------------------------
+
+User-agent: Googlebot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Bingbot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: DuckDuckBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Applebot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+# --- AI crawlers ------------------------------------------------------------
+# Named explicitly so the policy is unambiguous instead of inherited.
+
+User-agent: GPTBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: OAI-SearchBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: ChatGPT-User
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: ClaudeBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Claude-Web
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Claude-User
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Claude-SearchBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: anthropic-ai
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Google-Extended
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Applebot-Extended
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Amazonbot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: meta-externalagent
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: PerplexityBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Perplexity-User
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: CCBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: Bytespider
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: DuckAssistBot
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: cohere-ai
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+User-agent: MistralAI-User
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+Allow: /
+
+Sitemap: https://fss.coody.app/sitemap.xml
