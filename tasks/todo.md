@@ -38,11 +38,51 @@ HTTP 200 but `text/html`, which every scanner reads as "not found".
 - [x] Docs: www.md (agent-readiness table, Pages-not-Worker correction),
       deployment.md (zone runbook + DNS-AID rationale)
 - [x] Local verify: build, lint, typecheck
-- [ ] Deploy + live verify (`curl` content-types, isitagentready rescan)
+- [x] Deploy + live verify (`curl` content-types, isitagentready rescan)
 
 ## Review
 
-_pending deploy_
+Deployed to Pages prod (`c241e238`) and verified live on fss.coody.app:
+
+| Path | Result |
+|---|---|
+| `/robots.txt` | 200 `text/plain; charset=utf-8` |
+| `/sitemap.xml` | 200 `application/xml`, `<lastmod>2026-08-01</lastmod>` |
+| `/llms.txt` | 200 `text/plain; charset=utf-8` |
+| `Link:` on `/` | 4 relations, comma-joined per RFC 8288 |
+| `/install.sh` | 200 `text/x-shellscript` — Worker route unaffected |
+
+isitagentready rescan, the five in-scope checks:
+
+```
+pass  discoverability.robotsTxt
+pass  discoverability.sitemap
+pass  discoverability.linkHeaders
+pass  botAccessControl.robotsTxtAiRules
+pass  botAccessControl.contentSignals
+```
+
+Still failing, both understood:
+
+- `contentAccessibility.markdownNegotiation` — waiting on the zone setting
+  (runbook in deployment.md). Nothing more to do in this repo.
+- `discoverability.dnsAid` — skipped by decision, see above.
+
+The scanner also reports `discovery.*` failures (apiCatalog, oauth*, authMd,
+mcpServerCard, a2aAgentCard, agentSkills, webMcp). All of them describe an
+agent/API surface FSS does not have; they were not in scope and faking any of
+them would advertise endpoints that do not exist.
+
+## Lessons
+
+- An SPA on Pages answers *every* unknown path with `index.html` at HTTP 200,
+  so a missing well-known file looks present until you check `content-type`.
+  `curl -o /dev/null -w '%{content_type}'` is the check that matters, not the
+  status code.
+- Pages joins repeated header names in `_headers` with a comma, which is
+  exactly RFC 8288's list form — no need to hand-build one long `Link` line.
+- `wrangler pages dev dist/` honours `_headers` and MIME types, so the whole
+  thing is verifiable locally before touching prod.
 
 ---
 
